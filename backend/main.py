@@ -21,7 +21,7 @@ class QueryRequest(BaseModel):
 
 #listening
 @app.post("/retrieve")
-async def retrieve(request):
+async def retrieve(request: QueryRequest):
     try:
         results = retrieve_related_chunks(request.query, top_k=request.top_k)
         return {"results": results}
