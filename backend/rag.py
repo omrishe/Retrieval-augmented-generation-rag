@@ -3,7 +3,6 @@ import os
 from openai import OpenAI
 import random
 import chromadb
-import numpy as np
 import re
 import logging
 from config import chromadb_collection_name, top_k, similarity_threshold
@@ -24,16 +23,34 @@ def get_chroma_collection(collection_name=chromadb_collection_name):
 
 collection = get_chroma_collection()
 
+#takes a row and turn it to a string for embedding
+def row_to_text(row: dict) -> str:
+    parts = []
+
+    for key, val in row.items():
+        if val is None:
+            continue
+
+        key = key.strip()
+        val = val.strip()
+
+        parts.append(f"{key}: {val}")
+
+    if not parts:
+        return ""
+
+    text = " | ".join(parts)
+    return clean_text(text)
+
+
 # Text utils
-def clean_text(text):
+def clean_text(text:str):
     # remove special characters
-    text = re.sub(r'[^a-zA-Z0-9\\s:]', '', text)
+    text = re.sub(r'[^a-zA-Z0-9\s|:?!]', ' ', text)
     # remove extra whitespace
-    text = re.sub(r'\\s+', ' ', text)
-    # convert to lowercase
-    text = text.lower()
-    # remove stopwords
-    words = text.split()
+    text = re.sub(r'\s+', ' ', text)
+    # convert to lowercase and remove trailing and starting white spaces
+    text = text.lower().strip()
     return text
 
 # Token utils
@@ -102,7 +119,11 @@ def add_chunks_to_database(chunk_ids, chunks, embeddings, collection_name=chroma
 
 def retrieve_related_chunks(query, top_k=top_k, similarity_threshold=similarity_threshold, collection_name=chromadb_collection_name):
     logger.info(f"Retrieving related chunks for query: {query}")
-    query_chunks = chunk_text(query)
+    #if query is too big chunk it
+    if len(query) > 100000:
+        query_chunks = chunk_text(query)
+    else:
+        query_chunks = [query]
     query_embeddings = embed_chunks(query_chunks) # Embed all query chunks in one go
     
     collection = get_chroma_collection(collection_name)

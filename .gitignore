@@ -1,0 +1,6 @@
+README.MD
+**/.env*
+**/__pycache__*
+.vscode/settings.json
+backend/.venv
+
