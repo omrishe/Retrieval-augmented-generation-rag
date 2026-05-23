@@ -1,13 +1,18 @@
 import logging
-from config import  chunk_size,chunk_overlap
-from core import tokenize,detokenize
-
 logger = logging.getLogger(__name__)
+import tiktoken
+from config import  tokenizer_encoding,chunk_size,chunk_overlap
 
-#atm this slicing based on token length which can cause lost of
-#semantic,maybe add recursive chunking while not the perfect solution might be good
-#for non sample csv
-def ingestion_chunk_text(text: str) -> list[str]:
+enc = tiktoken.get_encoding(tokenizer_encoding)
+
+# Token utils
+def tokenize(text: str) -> list[int]:
+    return enc.encode(text)
+
+def detokenize(tokens: list[int]) -> str:
+    return enc.decode(tokens)
+
+def chunk_text(text: str) -> list[str]:
     #turns text into tokens eg: [15496, 995] = tokenize("Hello world")
     tokens = tokenize(text)
     chunks = []
@@ -18,4 +23,3 @@ def ingestion_chunk_text(text: str) -> list[str]:
         chunks.append(detokenize(chunk_tokens))
         start = end - chunk_overlap
     return chunks
-
