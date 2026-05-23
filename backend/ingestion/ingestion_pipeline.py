@@ -1,7 +1,7 @@
 import logging
 from .loader import retrieve_dataset
 from core import  embed_chunks, add_chunks_to_database
-from rag import ingestion_chunk_text
+from .rag import ingestion_chunk_text
 from .preprocessor import dataset_preprocessor
 from config import  batch_threshold, dataset_name,SOURCE_TYPE
 

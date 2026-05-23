@@ -1,111 +1,104 @@
-# RAG Retrieval Demo Program
+# RAG Retrieval Demo 🚀
 
-This project implements a Retrieval-Augmented Generation (RAG) demo program using FastAPI for the backend and a simple HTML/JavaScript frontend.
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-FF6B6B?style=for-the-badge&logo=chromadb&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
 
-## Project Structure
+A modular, production-grade Retrieval-Augmented Generation (RAG) pipeline and web application. The system ingests documents, processes and embeds text using OpenAI's models, stores them in a local ChromaDB vector store, and provides a FastAPI backend coupled with a simple HTML/JavaScript frontend to perform semantic searches.
 
+## 🌟 Key Features
+
+- **Scalable Batch Ingestion:** Process massive datasets without size limitations. Documents are processed and embedded in manageable batches, keeping memory usage low.
+- **Advanced Text Preprocessing:** Includes customizable strict cleaning and formatting to ensure high-quality vector embeddings.
+- **FastAPI Backend:** High-performance RESTful APIs to handle ingestion and query retrieval.
+- **ChromaDB Vector Store:** Efficient, persistent local vector database for storing chunks and metadata.
+- **OpenAI Embeddings:** Leverages state-of-the-art embedding models to accurately represent semantic meaning.
+- **Centralized Configuration:** Easy-to-tune parameters for chunk sizing, overlap, dataset selection, and tokenizer logic (`config.py`).
+- **Interactive UI:** A lightweight vanilla frontend for immediate querying and visualization of retrieved contexts and their similarity scores.
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    A[Dataset/CSV] -->|Loads Data| B(Ingestion Pipeline)
+    B -->|Preprocesses & Cleans| C{Text Chunker}
+    C -->|Batched Text Chunks| D[OpenAI Embedder]
+    D -->|Vectors & Metadata| E[(ChromaDB Vector Store)]
+
+    F[User Query] -->|Frontend UI| G[FastAPI Endpoint]
+    G -->|Embed Query| H[OpenAI Embedder]
+    H -->|Similarity Search| E
+    E -->|Top-K Results| G
+    G -->|Response| F
 ```
-.editorconfig
-.env (create this file, see Setup)
-README.md
-requirements.txt (create this file, see Setup)
-backend/
-  config.py
-  main.py
-  rag.py
-  utils/
-    fileRetrieve.py
-frontend/
-  index.html
+
+## 📂 Project Structure
+
+```text
+.
+├── backend/
+│   ├── app/                # FastAPI application, endpoints, and main server
+│   ├── chroma_db/          # Persistent local storage for the Chroma vector database
+│   ├── config/             # Centralized configuration (chunk size, overlap, thresholds)
+│   ├── core/               # Core business logic (embedding, vector store operations)
+│   ├── datasets/           # Directory containing source CSVs/documents
+│   ├── ingestion/          # Data ingestion pipeline (loaders, preprocessors, batching)
+│   ├── requirements.txt    # Python dependencies
+│   └── .env.example        # Example environment variables
+└── frontend/
+    └── index.html          # Lightweight interactive web UI
 ```
 
-## Features
+## 🚀 Setup & Installation
 
-- **FastAPI Backend**: Handles data processing, embedding generation, and retrieval logic.
-- **ChromaDB**: Used as the vector store for storing and retrieving document chunks.
-- **OpenAI Embeddings**: Generates embeddings for text chunks.
-- **Configurable**: Key parameters like chunk size, overlap, dataset name, and ChromaDB collection name are centralized in `backend/config.py`.
-- **Environment Variables**: API keys are securely loaded via `.env` file.
-- **Logging**: Robust logging implemented across backend components.
-- **Interactive Frontend**: A simple HTML/JavaScript interface to submit queries and display retrieved results.
+Follow these steps to set up the project locally:
 
-## Setup
+### 1. Configure Environment Variables
 
-Follow these steps to set up and run the project:
+Navigate to the `backend` directory, copy the `.env.example` file to create a `.env` file, and fill in your credentials.
 
-### 1. Create `.env` File
-
-Create a file named `.env` in the project's root directory and add your OpenAI API key:
-
+```bash
+cd backend
+cp .env.example .env
 ```
+
+Ensure your `.env` contains your API key:
+
+```env
 OPENAI_API_KEY="your_openai_api_key_here"
 ```
 
-Replace `"your_openai_api_key_here"` with your actual OpenAI API key.
+### 2. Install Dependencies
 
-(Optional) For using mock embeddings during development, you can add:
-
-```
-MOCK_EMBEDDINGS="true"
-```
-
-### 2. Create `requirements.txt` File
-
-Create a file named `requirements.txt` in the project's root directory with the following content:
-
-```
-openai
-pandas
-chromadb
-tiktoken
-fastapi
-uvicorn
-chardet
-numpy
-python-dotenv
-nltk
-```
-
-### 3. Install Dependencies
-
-Install the required Python packages using pip:
+It is highly recommended to use a virtual environment. Install the necessary Python packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Download NLTK Stopwords (if re-enabled)
+### 3. Run the Backend Server
 
-If you choose to re-enable stopword removal in `backend/rag.py` (which was removed in a previous step), you will need to download the NLTK stopwords corpus. You can do this by running a Python interpreter and executing:
-
-```python
-import nltk
-nltk.download('stopwords')
-```
-
-### 5. Run the FastAPI Backend
-
-Navigate to the `backend` directory in your terminal and start the FastAPI application:
+With the new modular structure, `main.py` is located inside the `app` folder. From the `backend` directory, start the FastAPI server using Uvicorn:
 
 ```bash
-cd backend
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
-The backend server will typically run on `http://127.0.0.1:8000`.
+The API will now be running at `http://127.0.0.1:8000`.
 
-### 6. Access the Frontend
+### 4. Access the Frontend
 
-Open the `frontend/index.html` file in your web browser. You can then type your queries into the input field and see the retrieved context chunks, their IDs, and similarity scores.
+Open the `frontend/index.html` file in your preferred web browser. You can immediately begin submitting queries to test the RAG pipeline's retrieval capabilities.
 
-## Configuration
+## ⚙️ Configuration (`backend/config/config.py`)
 
-Key configuration parameters are located in `backend/config.py`:
+You can fine-tune the behavior of the RAG pipeline by modifying the following parameters in `backend/config/config.py`:
 
-- `chunk_size`: Size of text chunks.
-- `chunk_overlap`: Overlap between text chunks.
-- `batch_size`: Number of chunks to embed in a single batch.
-- `dataset_name`: Name of the CSV dataset file.
-- `chromadb_collection_name`: Name of the ChromaDB collection.
-- `top_k`: Number of top similar chunks to retrieve.
-- `similarity_threshold`: Minimum similarity score for a chunk to be considered relevant.
+- `chunk_size`: Max token size for each text chunk.
+- `chunk_overlap`: Number of overlapping tokens between consecutive chunks.
+- `batch_threshold`: Number of chunks to process simultaneously (prevents large CSV bottlenecking).
+- `dataset_name`: The default dataset file to load.
+- `top_k`: How many results to return for a semantic query.
+- `similarity_threshold`: Minimum score to consider a chunk relevant.
+- `STRICT_CLEANING`: Toggle for aggressive text cleaning before embedding.
