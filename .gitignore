@@ -3,4 +3,4 @@ README.MD
 **/__pycache__*
 .vscode/settings.json
 backend/.venv
-backend/chroma_db
+backend/chroma_db/*

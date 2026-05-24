@@ -1,4 +1,3 @@
-import core.utils.file_retrieve as fr
 import os
 import chardet
 import logging

@@ -9,6 +9,8 @@ from config import  batch_threshold, dataset_name,SOURCE_TYPE
 logger = logging.getLogger(__name__)
 
 def initialize_rag_pipeline():
+    #dataset_name = input("Enter your file name(with File extension): ")#will be changed next update
+    
     if( SOURCE_TYPE== "dataset"):
         # retrieve dataset
         dataset = retrieve_dataset(dataset_name=dataset_name)

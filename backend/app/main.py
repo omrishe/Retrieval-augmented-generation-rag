@@ -1,32 +1,29 @@
-from config import top_k
-from core import retrieve_related_chunks
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI
 import logging
 from dotenv import load_dotenv
-from ingestion.ingestion_pipeline import initialize_rag_pipeline
-
+from app.api import router
+from fastapi.middleware.cors import CORSMiddleware
 load_dotenv() # Load environment variables from .env file
 
 # Sets up logging to see messages in console
 logging.basicConfig(level=logging.INFO, format='\n%(asctime)s - %(levelname)s - %(message)s\n')
 logger = logging.getLogger(__name__)
-initialize_rag_pipeline()
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-class QueryRequest(BaseModel):
-    query: str
-    top_k: int = top_k
+app.include_router(router)
 
-#listening
-@app.post("/retrieve")
-async def retrieve(request: QueryRequest):
-    try:
-        results = retrieve_related_chunks(request.query, top_k=request.top_k)
-        return {"results": results}
-    except Exception as e:
-        logger.exception("Error during retrieval")
-        raise HTTPException(status_code=500, detail="Internal Server Error during retrieval")
+#if collection is empty start ingesting
+@app.on_event("startup")
+def startup():
+    from services import start_rag_ingestion
+    start_rag_ingestion()
 
 if __name__ == "__main__":
     import uvicorn
